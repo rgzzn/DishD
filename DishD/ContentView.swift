@@ -1,61 +1,30 @@
-//
-//  ContentView.swift
-//  DishD
-//
-//  Created by Luca Ragazzini on 23/06/2026.
-//
-
 import SwiftUI
-import SwiftData
 
+/// Compatibility entry view kept at the original Xcode template path.
+/// The app's real navigation lives in `RootView`, but retaining this file
+/// prevents stale Xcode tabs/references from pointing at a deleted source file.
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
+        RootView()
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(
+            for: [
+                RecipeEntity.self,
+                IngredientSectionEntity.self,
+                IngredientEntity.self,
+                RecipeStepEntity.self,
+                TagEntity.self,
+                UnresolvedFieldEntity.self,
+                ImportJobEntity.self,
+                MealPlanWeekEntity.self,
+                MealPlanEntryEntity.self,
+                GroceryListEntity.self,
+                GroceryItemEntity.self
+            ],
+            inMemory: true
+        )
 }
