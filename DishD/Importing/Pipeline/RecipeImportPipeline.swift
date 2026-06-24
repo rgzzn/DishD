@@ -1,4 +1,5 @@
 import Foundation
+import UniformTypeIdentifiers
 
 actor RecipeImportPipeline {
     private let webFetcher: WebRecipeFetcher
@@ -93,8 +94,8 @@ actor RecipeImportPipeline {
         defer {
             if accessed { url.stopAccessingSecurityScopedResource() }
         }
-        switch url.pathExtension.lowercased() {
-        case "pdf":
+        switch Self.fileKind(for: url) {
+        case .pdf:
             let data = try Data(contentsOf: url, options: [.mappedIfSafe])
             let evidence = try await pdfTextExtractor.extractEvidence(from: data)
             let source = RecipeSourceDraft(
@@ -107,24 +108,49 @@ actor RecipeImportPipeline {
             var draft = try await importText(evidence.text, source: source)
             draft.referenceImageURL = evidence.referenceImageURL
             return draft
-        case "jpg", "jpeg", "png", "heic", "heif", "tiff", "webp":
+        case .image:
             let data = try Data(contentsOf: url, options: [.mappedIfSafe])
             return try await importImageData(data)
-        case "mov", "mp4", "m4v":
+        case .video:
             return try await importVideo(
                 at: url,
                 context: context,
                 progress: progress
             )
-        case "txt", "md", "rtf":
+        case .text:
             let data = try Data(contentsOf: url, options: [.mappedIfSafe])
             guard let text = String(data: data, encoding: .utf8) else {
                 throw ImportError.unsupportedContent
             }
             return try await importText(text, source: .manual)
-        default:
+        case .unsupported:
             throw ImportError.unsupportedContent
         }
+    }
+
+    private enum FileKind {
+        case pdf, image, video, text, unsupported
+    }
+
+    /// Classifies a file by extension, falling back to UTType conformance so files
+    /// arriving from the share sheet with unusual-but-valid extensions still import.
+    private static func fileKind(for url: URL) -> FileKind {
+        switch url.pathExtension.lowercased() {
+        case "pdf": return .pdf
+        case "jpg", "jpeg", "png", "heic", "heif", "tiff", "webp": return .image
+        case "mov", "mp4", "m4v": return .video
+        case "txt", "md", "rtf": return .text
+        default:
+            break
+        }
+        guard let type = UTType(filenameExtension: url.pathExtension.lowercased()) else {
+            return .unsupported
+        }
+        if type.conforms(to: .pdf) { return .pdf }
+        if type.conforms(to: .movie) { return .video }
+        if type.conforms(to: .image) { return .image }
+        if type.conforms(to: .text) { return .text }
+        return .unsupported
     }
 
     func importVideo(
@@ -182,13 +208,17 @@ actor RecipeImportPipeline {
             let post = try await socialPostFetcher.fetch(url)
             if let remoteVideoURL = post.remoteVideoURL {
                 do {
+                    // Download to a local temp file so AVAssetImageGenerator can seek
+                    // to any frame, not just those already in the network buffer.
+                    let localURL = try await downloadRemoteVideo(from: remoteVideoURL)
+                    defer { try? FileManager.default.removeItem(at: localURL) }
                     return try await importVideo(
-                        at: remoteVideoURL,
+                        at: localURL,
                         context: post.combinedText(with: context),
                         source: post.source
                     )
                 } catch {
-                    // Social platforms often expose embed-only URLs. Keep the caption path alive.
+                    // Remote video inaccessible or empty — continue with caption text.
                 }
             }
             let draft = try await importText(
@@ -197,8 +227,10 @@ actor RecipeImportPipeline {
             )
             return await attachingReferenceImage(to: draft)
         } catch {
+            // The platform exposed nothing usable. If the user pasted any caption
+            // alongside the link, use it — otherwise surface an actionable error.
             if let context = context?.trimmingCharacters(in: .whitespacesAndNewlines),
-               context.count > 40 {
+               context.count >= 12 {
                 let source = RecipeSourceDraft(
                     title: nil,
                     author: nil,
@@ -210,6 +242,44 @@ actor RecipeImportPipeline {
             }
             throw ImportError.socialContentUnavailable
         }
+    }
+
+    /// Downloads a remote video to a local temporary file so local frame extraction works.
+    /// Limited to 200 MB to avoid runaway downloads.
+    private func downloadRemoteVideo(from url: URL) async throws -> URL {
+        let maximumBytes = 200_000_000
+        var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.setValue(
+            "DishD/1.0 (social recipe importer)",
+            forHTTPHeaderField: "User-Agent"
+        )
+
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 120
+        let session = URLSession(configuration: config)
+
+        let (tempURL, response) = try await session.download(for: request)
+        guard let http = response as? HTTPURLResponse,
+              (200..<300).contains(http.statusCode)
+        else {
+            try? FileManager.default.removeItem(at: tempURL)
+            throw ImportError.inaccessibleURL
+        }
+
+        let attrs = try? FileManager.default.attributesOfItem(atPath: tempURL.path)
+        let fileSize = (attrs?[.size] as? Int) ?? 0
+        guard fileSize <= maximumBytes else {
+            try? FileManager.default.removeItem(at: tempURL)
+            throw ImportError.responseTooLarge
+        }
+
+        let ext = url.pathExtension.nilIfBlank ?? "mp4"
+        let stableURL = FileManager.default.temporaryDirectory
+            .appending(path: "\(UUID().uuidString).\(ext)")
+        try FileManager.default.moveItem(at: tempURL, to: stableURL)
+        return stableURL
     }
 
     private func importText(
@@ -235,13 +305,32 @@ actor RecipeImportPipeline {
             if let deterministic {
                 return deterministic.draft
             }
+            if let fallback = manualFallbackDraft(for: text, source: source) {
+                return fallback
+            }
             throw ImportError.noUsableContent
         } catch {
+            // The model failed (context overflow, guardrail, cold-start timeout, ...).
+            // Never dead-end the user: prefer a deterministic parse, otherwise hand back
+            // an editable manual draft seeded from the source text so they can finish it.
             if let deterministic {
                 return deterministic.draft
             }
+            if let fallback = manualFallbackDraft(for: text, source: source) {
+                return fallback
+            }
             throw error
         }
+    }
+
+    /// Builds an editable manual draft from raw text when both the model and the
+    /// deterministic parser fail, as long as there is enough text to be worth editing.
+    private func manualFallbackDraft(for text: String, source: RecipeSourceDraft) -> RecipeDraft? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= 12 else { return nil }
+        var draft = makeManualDraft(from: trimmed)
+        draft.source = source
+        return draft
     }
 
     private func strictHTTPSURL(from text: String) -> URL? {
@@ -310,5 +399,12 @@ actor RecipeImportPipeline {
             "instagram.com",
             "tiktok.com"
         ].contains { host == $0 || host.hasSuffix(".\($0)") }
+    }
+}
+
+private extension String {
+    var nilIfBlank: String? {
+        let value = trimmingCharacters(in: .whitespacesAndNewlines)
+        return value.isEmpty ? nil : value
     }
 }

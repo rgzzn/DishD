@@ -46,7 +46,7 @@ enum ImportError: LocalizedError, Sendable {
         case .noUsableContent:
             "Aggiungi ingredienti e procedimento oppure passa all’inserimento manuale."
         case .socialContentUnavailable:
-            "Condividi un post pubblico da Instagram o TikTok. Se la piattaforma non espone caption o metadati, aggiungi la didascalia o gli ingredienti nel campo testo."
+            "Instagram e TikTok spesso non mostrano il testo del post a chi non ha fatto il login. Per un risultato sicuro condividi il VIDEO con DishD (apri il post, tocca Condividi o Salva video e scegli DishD), oppure incolla qui la didascalia con ingredienti e procedimento."
         case .modelUnavailable(let availability):
             availability.italianMessage
         case .transcriptionUnavailable:

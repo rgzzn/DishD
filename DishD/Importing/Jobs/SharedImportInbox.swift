@@ -10,6 +10,7 @@ actor SharedImportInbox {
             return nil
         }
         let directory = container.appending(path: "PendingImports", directoryHint: .isDirectory)
+        purgeStaleFiles(in: directory.appending(path: "Files", directoryHint: .isDirectory))
         guard let files = try? FileManager.default.contentsOfDirectory(
             at: directory,
             includingPropertiesForKeys: [.contentModificationDateKey],
@@ -47,6 +48,26 @@ actor SharedImportInbox {
             text: combined.isEmpty ? nil : combined,
             fileURL: fileURL
         )
+    }
+
+    /// Removes shared files older than a day. The main app consumes a file once and the
+    /// share extension never cleans up, so without this the App Group container grows
+    /// unbounded with imported videos/images.
+    private func purgeStaleFiles(in directory: URL) {
+        guard let files = try? FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.contentModificationDateKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return
+        }
+        let cutoff = Date(timeIntervalSinceNow: -86_400)
+        for file in files {
+            let modified = (try? file.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+            if modified < cutoff {
+                try? FileManager.default.removeItem(at: file)
+            }
+        }
     }
 }
 
