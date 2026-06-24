@@ -101,6 +101,18 @@ enum RecipeArtworkStore {
         return FileManager.default.fileExists(atPath: url.path) ? url : nil
     }
 
+    static func deleteArtwork(for relativePath: String?) {
+        guard let relativePath,
+              let root = try? applicationSupportDirectory()
+        else {
+            return
+        }
+        let url = root.appending(path: relativePath)
+        if FileManager.default.fileExists(atPath: url.path) {
+            try? FileManager.default.removeItem(at: url)
+        }
+    }
+
     private static func applicationSupportDirectory() throws -> URL {
         guard let directory = FileManager.default.urls(
             for: .applicationSupportDirectory,

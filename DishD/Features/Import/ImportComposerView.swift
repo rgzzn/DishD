@@ -336,6 +336,11 @@ struct ImportComposerView: View {
                     from: generatedImageURL,
                     recipeID: recipe.id
                 )
+            } else if let referenceImageURL = draft.referenceImageURL {
+                recipe.heroImageRelativePath = try RecipeArtworkStore.persistGeneratedImage(
+                    from: referenceImageURL,
+                    recipeID: recipe.id
+                )
             }
             modelContext.insert(recipe)
             try modelContext.save()
@@ -372,8 +377,8 @@ private struct ImportHintCard: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             Label(
-                "Per Instagram e TikTok puoi condividere il video, salvarlo in Foto oppure usare una registrazione dello schermo.",
-                systemImage: "video.badge.plus"
+                "Da Instagram e TikTok condividi il link pubblico del video: DishD legge caption e metadati disponibili.",
+                systemImage: "link.badge.plus"
             )
             .font(.footnote)
             .foregroundStyle(.secondary)

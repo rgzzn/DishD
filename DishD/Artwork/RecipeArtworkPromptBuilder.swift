@@ -42,10 +42,10 @@ enum RecipeArtworkPromptBuilder {
         let ingredientText = uniqueIngredients.prefix(12).joined(separator: ", ")
         let description = """
         Crea una copertina curata del piatto finito “\(title)”.
-        Mostra il cibo come protagonista, ben impiattato, appetitoso e riconoscibile.
+        Mostra il cibo come protagonista, con aspetto realistico, ben impiattato, appetitoso e riconoscibile.
         Ingredienti caratteristici: \(ingredientText).
         \(summary ?? "")
-        Inquadratura ravvicinata, luce naturale morbida, composizione pulita, senza testo, loghi, persone o utensili che nascondano il piatto.
+        Inquadratura ravvicinata, luce naturale morbida, composizione pulita, resa credibile e non fumettosa, senza testo, loghi, persone o utensili che nascondano il piatto.
         """
         return [
             .extracted(

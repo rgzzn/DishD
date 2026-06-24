@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "it",
   "strings" : {
-    "%@" : {
-
-    },
     "%@, cena, %@" : {
       "localizations" : {
         "it" : {
@@ -83,6 +80,9 @@
     "Contenuto da importare" : {
 
     },
+    "Controlla" : {
+
+    },
     "Copertina del piatto" : {
 
     },
@@ -107,6 +107,9 @@
     "Da controllare" : {
 
     },
+    "Da Instagram e TikTok condividi il link pubblico del video: DishD legge caption e metadati disponibili." : {
+
+    },
     "Da ricetta" : {
 
     },
@@ -125,16 +128,25 @@
     "DishD non configura modelli cloud, account, analytics di terze parti o backend. La rete viene usata solo per leggere gli URL che scegli di importare." : {
 
     },
-    "DishD prepara nome, ingredienti e immagine della fonte per Image Playground." : {
+    "DishD usa l’immagine della fonte come copertina. Puoi generarne una nuova quando vuoi." : {
 
     },
     "Elaborazione AI sul dispositivo" : {
+
+    },
+    "Elimina" : {
+
+    },
+    "Elimina ricetta" : {
 
     },
     "Elimina tutte le ricette" : {
 
     },
     "Elimina tutto" : {
+
+    },
+    "Eliminare questa ricetta?" : {
 
     },
     "Eliminare tutte le ricette?" : {
@@ -237,9 +249,6 @@
     "PDF, testo o video da File" : {
 
     },
-    "Per Instagram e TikTok puoi condividere il video, salvarlo in Foto oppure usare una registrazione dello schermo." : {
-
-    },
     "Piano" : {
 
     },
@@ -301,6 +310,9 @@
 
     },
     "Se un social condivide soltanto il link, aggiungi anche didascalia o testo." : {
+
+    },
+    "Sei sicuro di voler eliminare \"%@\"? Questa azione non può essere annullata." : {
 
     },
     "Settimana precedente" : {

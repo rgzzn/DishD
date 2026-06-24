@@ -22,7 +22,7 @@ enum ImportError: LocalizedError, Sendable {
         case .unsupportedContent: "Il contenuto non è supportato"
         case .responseTooLarge: "La pagina è troppo grande"
         case .noUsableContent: "Non ho trovato una ricetta utilizzabile"
-        case .socialContentUnavailable: "Il social ha condiviso soltanto il link"
+        case .socialContentUnavailable: "Non ho trovato dettagli leggibili nel post"
         case .modelUnavailable: "Apple Intelligence non è disponibile"
         case .transcriptionUnavailable: "Trascrizione locale non disponibile"
         case .extractionFailed: "Non sono riuscito a creare la ricetta"
@@ -46,7 +46,7 @@ enum ImportError: LocalizedError, Sendable {
         case .noUsableContent:
             "Aggiungi ingredienti e procedimento oppure passa all’inserimento manuale."
         case .socialContentUnavailable:
-            "Da Instagram o TikTok condividi il video vero, la didascalia, oppure una registrazione dello schermo. DishD non aggira login o protezioni della piattaforma."
+            "Condividi un post pubblico da Instagram o TikTok. Se la piattaforma non espone caption o metadati, aggiungi la didascalia o gli ingredienti nel campo testo."
         case .modelUnavailable(let availability):
             availability.italianMessage
         case .transcriptionUnavailable:

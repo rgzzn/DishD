@@ -8,6 +8,7 @@ actor RecipeImportPipeline {
     private let pdfTextExtractor: PDFTextExtractor
     private let videoRecipeExtractor: VideoRecipeExtractor
     private let sourceImageFetcher: SourceImageFetcher
+    private let socialPostFetcher: SocialPostFetcher
 
     init(
         webFetcher: WebRecipeFetcher = WebRecipeFetcher(),
@@ -16,7 +17,8 @@ actor RecipeImportPipeline {
         imageTextExtractor: ImageTextExtractor = ImageTextExtractor(),
         pdfTextExtractor: PDFTextExtractor = PDFTextExtractor(),
         videoRecipeExtractor: VideoRecipeExtractor = VideoRecipeExtractor(),
-        sourceImageFetcher: SourceImageFetcher = SourceImageFetcher()
+        sourceImageFetcher: SourceImageFetcher = SourceImageFetcher(),
+        socialPostFetcher: SocialPostFetcher = SocialPostFetcher()
     ) {
         self.webFetcher = webFetcher
         self.textParser = textParser
@@ -25,6 +27,7 @@ actor RecipeImportPipeline {
         self.pdfTextExtractor = pdfTextExtractor
         self.videoRecipeExtractor = videoRecipeExtractor
         self.sourceImageFetcher = sourceImageFetcher
+        self.socialPostFetcher = socialPostFetcher
     }
 
     func importContent(_ input: String) async throws -> RecipeDraft {
@@ -34,6 +37,12 @@ actor RecipeImportPipeline {
 
         if let url = strictHTTPSURL(from: trimmed) {
             return try await importURL(url)
+        }
+        if let match = firstSocialURLMatch(in: trimmed) {
+            return try await importSocialURL(
+                match.url,
+                context: removing(range: match.range, from: trimmed)
+            )
         }
         return try await importText(trimmed, source: .manual)
     }
@@ -121,6 +130,7 @@ actor RecipeImportPipeline {
     func importVideo(
         at url: URL,
         context: String? = nil,
+        source: RecipeSourceDraft? = nil,
         progress: @escaping @Sendable (VideoImportPhase) async -> Void = { _ in }
     ) async throws -> RecipeDraft {
         let evidence = try await videoRecipeExtractor.extractEvidence(
@@ -128,7 +138,7 @@ actor RecipeImportPipeline {
             progress: progress
         )
         await progress(.buildingEvidence)
-        let source = RecipeSourceDraft(
+        let source = source ?? RecipeSourceDraft(
             title: url.deletingPathExtension().lastPathComponent,
             author: nil,
             url: nil,
@@ -144,6 +154,10 @@ actor RecipeImportPipeline {
     }
 
     private func importURL(_ url: URL) async throws -> RecipeDraft {
+        if Self.isSupportedSocialImportURL(url) {
+            return try await importSocialURL(url, context: nil)
+        }
+
         do {
             switch try await webFetcher.fetch(url) {
             case .structured(let recipe):
@@ -160,6 +174,41 @@ actor RecipeImportPipeline {
                 throw ImportError.socialContentUnavailable
             }
             throw error
+        }
+    }
+
+    private func importSocialURL(_ url: URL, context: String?) async throws -> RecipeDraft {
+        do {
+            let post = try await socialPostFetcher.fetch(url)
+            if let remoteVideoURL = post.remoteVideoURL {
+                do {
+                    return try await importVideo(
+                        at: remoteVideoURL,
+                        context: post.combinedText(with: context),
+                        source: post.source
+                    )
+                } catch {
+                    // Social platforms often expose embed-only URLs. Keep the caption path alive.
+                }
+            }
+            let draft = try await importText(
+                post.combinedText(with: context),
+                source: post.source
+            )
+            return await attachingReferenceImage(to: draft)
+        } catch {
+            if let context = context?.trimmingCharacters(in: .whitespacesAndNewlines),
+               context.count > 40 {
+                let source = RecipeSourceDraft(
+                    title: nil,
+                    author: nil,
+                    url: url,
+                    platform: SocialPostFetcher.platformName(for: url) ?? "social",
+                    attribution: url.host
+                )
+                return try await importText(context, source: source)
+            }
+            throw ImportError.socialContentUnavailable
         }
     }
 
@@ -206,6 +255,33 @@ actor RecipeImportPipeline {
         return url
     }
 
+    private func firstSocialURLMatch(in text: String) -> (url: URL, range: Range<String.Index>)? {
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
+            return nil
+        }
+        let range = NSRange(text.startIndex..., in: text)
+        for match in detector.matches(in: text, range: range) {
+            guard let url = match.url,
+                  url.scheme?.lowercased() == "https",
+                  Self.isSupportedSocialImportURL(url),
+                  let stringRange = Range(match.range, in: text)
+            else {
+                continue
+            }
+            return (url, stringRange)
+        }
+        return nil
+    }
+
+    private func removing(range: Range<String.Index>, from text: String) -> String? {
+        var context = text
+        context.removeSubrange(range)
+        let cleaned = context
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return cleaned.isEmpty ? nil : cleaned
+    }
+
     private func attachingReferenceImage(to original: RecipeDraft) async -> RecipeDraft {
         guard let imageURL = original.source.imageURL,
               let localURL = try? await sourceImageFetcher.fetchTemporaryImage(from: imageURL)
@@ -225,6 +301,14 @@ actor RecipeImportPipeline {
             "youtube.com",
             "youtu.be",
             "facebook.com"
+        ].contains { host == $0 || host.hasSuffix(".\($0)") }
+    }
+
+    private static func isSupportedSocialImportURL(_ url: URL) -> Bool {
+        guard let host = url.host?.lowercased() else { return false }
+        return [
+            "instagram.com",
+            "tiktok.com"
         ].contains { host == $0 || host.hasSuffix(".\($0)") }
     }
 }

@@ -13,8 +13,14 @@ final class ShareViewController: UIViewController {
             onCancel: { [weak self] in
                 self?.extensionContext?.cancelRequest(withError: CancellationError())
             },
-            onComplete: { [weak self] in
-                self?.extensionContext?.completeRequest(returningItems: nil)
+            onComplete: { [weak self] result in
+                switch result {
+                case .queued:
+                    self?.extensionContext?.completeRequest(returningItems: nil)
+                case .openContainingApp(let url):
+                    self?.extensionContext?.open(url, completionHandler: nil)
+                    self?.extensionContext?.completeRequest(returningItems: nil)
+                }
             }
         )
         let host = UIHostingController(rootView: rootView)

@@ -6,10 +6,12 @@ struct RecipeDetailView: View {
     @Bindable var recipe: RecipeEntity
     @Environment(\.modelContext) private var modelContext
     @Environment(\.supportsImagePlayground) private var supportsImagePlayground
+    @Environment(\.dismiss) private var dismiss
     @State private var servings: Decimal?
     @State private var addedToGrocery = false
     @State private var showingArtworkGenerator = false
     @State private var artworkError: String?
+    @State private var showingDeleteConfirmation = false
 
     var body: some View {
         ScrollView {
@@ -61,6 +63,12 @@ struct RecipeDetailView: View {
                     if let urlString = recipe.sourceURLString, let url = URL(string: urlString) {
                         Link("Apri fonte originale", destination: url)
                     }
+                    
+                    Divider()
+                    
+                    Button("Elimina ricetta", systemImage: "trash", role: .destructive) {
+                        showingDeleteConfirmation = true
+                    }
                 } label: {
                     Label("Azioni", systemImage: "ellipsis")
                 }
@@ -87,6 +95,23 @@ struct RecipeDetailView: View {
                 onCompletion: acceptGeneratedArtwork
             )
         )
+        .confirmationDialog(
+            "Eliminare questa ricetta?",
+            isPresented: $showingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Elimina", role: .destructive) {
+                if let path = recipe.heroImageRelativePath {
+                    RecipeArtworkStore.deleteArtwork(for: path)
+                }
+                modelContext.delete(recipe)
+                try? modelContext.save()
+                dismiss()
+            }
+            Button("Annulla", role: .cancel) {}
+        } message: {
+            Text("Sei sicuro di voler eliminare \"\(recipe.title)\"? Questa azione non può essere annullata.")
+        }
     }
 
     private var hero: some View {
@@ -245,8 +270,8 @@ private struct RecipeDetailImagePlaygroundSheet: ViewModifier {
             }
         }
         .imagePlaygroundGenerationStyle(
-            .illustration,
-            in: [.illustration, .animation, .sketch]
+            .animation,
+            in: [.animation, .illustration, .sketch]
         )
         .imagePlaygroundOptions(options)
     }

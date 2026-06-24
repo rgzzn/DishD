@@ -6,7 +6,6 @@ struct RecipeArtworkEditor: View {
     @Binding var draft: RecipeDraft
     @Environment(\.supportsImagePlayground) private var supportsImagePlayground
     @State private var isPresentingPlayground = false
-    @State private var didAutomaticallyOfferGeneration = false
     @State private var errorMessage: String?
 
     private var previewURL: URL? {
@@ -20,7 +19,7 @@ struct RecipeArtworkEditor: View {
                     Text("Copertina del piatto")
                         .font(.title2.bold())
                     Text(draft.generatedImageURL == nil
-                         ? "DishD prepara nome, ingredienti e immagine della fonte per Image Playground."
+                         ? "DishD usa l’immagine della fonte come copertina. Puoi generarne una nuova quando vuoi."
                          : "Copertina generata con i dati della ricetta.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -85,18 +84,6 @@ struct RecipeArtworkEditor: View {
                 onCompletion: acceptGeneratedImage
             )
         )
-        .task {
-            guard supportsImagePlayground,
-                  !didAutomaticallyOfferGeneration,
-                  draft.generatedImageURL == nil
-            else {
-                return
-            }
-            didAutomaticallyOfferGeneration = true
-            try? await Task.sleep(for: .milliseconds(450))
-            guard !Task.isCancelled else { return }
-            isPresentingPlayground = true
-        }
     }
 
     private func acceptGeneratedImage(_ url: URL) {
@@ -112,6 +99,7 @@ struct RecipeArtworkEditor: View {
 struct LocalRecipeArtworkView: View {
     let url: URL?
     var placeholderSymbol = "fork.knife"
+    var cornerRadius: CGFloat = 18
 
     var body: some View {
         ZStack {
@@ -135,8 +123,9 @@ struct LocalRecipeArtworkView: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .frame(maxHeight: .infinity)
         .clipped()
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .accessibilityLabel(url == nil ? "Copertina non ancora generata" : "Copertina della ricetta")
     }
 }
@@ -166,8 +155,8 @@ private struct RecipeImagePlaygroundSheet: ViewModifier {
             }
         }
         .imagePlaygroundGenerationStyle(
-            .illustration,
-            in: [.illustration, .animation, .sketch]
+            .animation,
+            in: [.animation, .illustration, .sketch]
         )
         .imagePlaygroundOptions(options)
     }

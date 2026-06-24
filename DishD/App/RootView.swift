@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct RootView: View {
+    @Environment(\.scenePhase) private var scenePhase
     let environment: AppEnvironment
     @State private var router = AppRouter()
     @State private var handledLaunchAutomation = false
@@ -34,15 +35,16 @@ struct RootView: View {
                 router.presentedSheet = .importRecipe
             }
             .task {
-                guard launchAutomationInput == nil,
-                      launchAutomationFileURL == nil,
-                      let pending = await environment.sharedImportInbox.consumeNext()
-                else {
-                    return
+                await consumePendingSharedImport()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active else { return }
+                Task {
+                    await consumePendingSharedImport()
                 }
-                sharedImportInput = pending.text
-                sharedImportFileURL = pending.fileURL
-                router.presentedSheet = .importRecipe
+            }
+            .onOpenURL { url in
+                handleIncomingURL(url)
             }
     }
 
@@ -79,6 +81,8 @@ struct RootView: View {
                 SettingsView(availabilityChecker: environment.availabilityChecker)
             }
         }
+        .toolbarBackground(DishDColor.surface, for: .tabBar)
+        .toolbarBackground(.visible, for: .tabBar)
     }
 
     private var launchAutomationInput: String? {
@@ -113,6 +117,49 @@ struct RootView: View {
         #else
         false
         #endif
+    }
+
+    private func handleIncomingURL(_ url: URL) {
+        guard url.scheme == AppBrand.urlScheme,
+              url.host == "import" || url.path == "/import",
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        else {
+            return
+        }
+        let input = components.queryItems?.first(where: { $0.name == "input" })?.value
+            ?? components.queryItems?.first(where: { $0.name == "url" })?.value
+            ?? components.queryItems?.first(where: { $0.name == "text" })?.value
+        let note = components.queryItems?.first(where: { $0.name == "note" })?.value
+        let combined = [input, note]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: "\n\n")
+        guard !combined.isEmpty else { return }
+        sharedImportInput = combined
+        sharedImportFileURL = nil
+        router.presentedSheet = .importRecipe
+    }
+
+    private func consumePendingSharedImport() async {
+        guard launchAutomationInput == nil,
+              launchAutomationFileURL == nil,
+              router.presentedSheet == nil
+        else {
+            return
+        }
+
+        if let pending = await environment.sharedImportInbox.consumeNext() {
+            sharedImportInput = pending.text
+            sharedImportFileURL = pending.fileURL
+            router.presentedSheet = .importRecipe
+            return
+        }
+
+        if let pasteboardInput = SharedImportPasteboardReader.consume() {
+            sharedImportInput = pasteboardInput
+            sharedImportFileURL = nil
+            router.presentedSheet = .importRecipe
+        }
     }
 }
 

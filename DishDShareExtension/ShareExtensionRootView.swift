@@ -17,17 +17,17 @@ final class ShareExtensionModel {
         isLoading = false
     }
 
-    func save() throws {
+    func save() throws -> SharedSaveResult {
         isSaving = true
         defer { isSaving = false }
-        try collector.save(note: note)
+        return try collector.save(note: note)
     }
 }
 
 struct ShareExtensionRootView: View {
     @State var model: ShareExtensionModel
     let onCancel: () -> Void
-    let onComplete: () -> Void
+    let onComplete: (SharedSaveResult) -> Void
 
     var body: some View {
         NavigationStack {
@@ -75,8 +75,8 @@ struct ShareExtensionRootView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Salva") {
                         do {
-                            try model.save()
-                            onComplete()
+                            let result = try model.save()
+                            onComplete(result)
                         } catch {
                             model.errorMessage = "Non è stato possibile salvare nella coda di DishD."
                         }
