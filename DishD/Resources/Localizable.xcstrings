@@ -1,5 +1,335 @@
 {
   "sourceLanguage" : "it",
-  "strings" : {},
+  "strings" : {
+    "%@" : {
+
+    },
+    "%@, cena, %@" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, cena, %2$@"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "Aggiungi" : {
+
+    },
+    "Aggiungi elemento" : {
+
+    },
+    "Aggiungi il procedimento prima di avviare la modalità cucina." : {
+
+    },
+    "Aggiungi ingredienti alla spesa" : {
+
+    },
+    "Aggiungi un elemento o importa gli ingredienti da una ricetta." : {
+
+    },
+    "Aggiunti alla spesa" : {
+
+    },
+    "AI locale: nessun contenuto viene inviato a modelli remoti" : {
+
+    },
+    "Analizza" : {
+
+    },
+    "Annulla" : {
+
+    },
+    "Apple Intelligence" : {
+
+    },
+    "Apre DishD per importare testo, un link, una foto o un PDF." : {
+
+    },
+    "Apre la lista della spesa locale in DishD." : {
+
+    },
+    "Apri fonte originale" : {
+
+    },
+    "Apro DishD." : {
+
+    },
+    "Avanti" : {
+
+    },
+    "Avvia modalità cucina" : {
+
+    },
+    "Azioni" : {
+
+    },
+    "Cena" : {
+
+    },
+    "Chiudi" : {
+
+    },
+    "Completa" : {
+
+    },
+    "Completato" : {
+
+    },
+    "Contenuto da importare" : {
+
+    },
+    "Copertina del piatto" : {
+
+    },
+    "Copertina della ricetta" : {
+
+    },
+    "Copertina generata con i dati della ricetta." : {
+
+    },
+    "Copertina non ancora generata" : {
+
+    },
+    "Copertina non disponibile" : {
+
+    },
+    "Crea ricetta" : {
+
+    },
+    "Da contenuto caotico a ricetta ordinata" : {
+
+    },
+    "Da controllare" : {
+
+    },
+    "Da ricetta" : {
+
+    },
+    "Dati" : {
+
+    },
+    "Descrivi il passaggio" : {
+
+    },
+    "Dettaglio" : {
+
+    },
+    "DishD è pronto per una nuova ricetta." : {
+
+    },
+    "DishD non configura modelli cloud, account, analytics di terze parti o backend. La rete viene usata solo per leggere gli URL che scegli di importare." : {
+
+    },
+    "DishD prepara nome, ingredienti e immagine della fonte per Image Playground." : {
+
+    },
+    "Elaborazione AI sul dispositivo" : {
+
+    },
+    "Elimina tutte le ricette" : {
+
+    },
+    "Elimina tutto" : {
+
+    },
+    "Eliminare tutte le ricette?" : {
+
+    },
+    "Facoltativo" : {
+
+    },
+    "Filtro attivo" : {
+
+    },
+    "Filtro non attivo" : {
+
+    },
+    "Foto" : {
+
+    },
+    "Funziona meglio con" : {
+
+    },
+    "Genera copertina con AI" : {
+
+    },
+    "Image Playground non è disponibile su questo dispositivo." : {
+
+    },
+    "Immagine sorgente" : {
+
+    },
+    "Importa" : {
+
+    },
+    "Importa comunque" : {
+
+    },
+    "Importa ricetta" : {
+
+    },
+    "Importa una ricetta" : {
+
+    },
+    "Impostazioni" : {
+
+    },
+    "Incolla testo, una didascalia o un URL pubblico. Per i link DishD legge prima i dati ricetta della pagina; usa Apple Intelligence locale solo quando serve." : {
+
+    },
+    "Indietro" : {
+
+    },
+    "Informazioni" : {
+
+    },
+    "Ingrediente" : {
+
+    },
+    "INGREDIENTE" : {
+
+    },
+    "Ingredienti" : {
+
+    },
+    "L’elaborazione resta sul dispositivo, salvo il download della pagina che hai scelto." : {
+
+    },
+    "Lingua" : {
+
+    },
+    "Lista vuota" : {
+
+    },
+    "Mostra la lista della spesa" : {
+
+    },
+    "Mostra spesa" : {
+
+    },
+    "Nessun passaggio" : {
+
+    },
+    "Nome sezione" : {
+
+    },
+    "OK" : {
+
+    },
+    "Pagine con dati Recipe, elenchi di ingredienti, procedimenti numerati e didascalie complete." : {
+
+    },
+    "Passaggio %lld di %lld" : {
+      "localizations" : {
+        "it" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Passaggio %1$lld di %2$lld"
+          }
+        }
+      }
+    },
+    "PDF, testo o video da File" : {
+
+    },
+    "Per Instagram e TikTok puoi condividere il video, salvarlo in Foto oppure usare una registrazione dello schermo." : {
+
+    },
+    "Piano" : {
+
+    },
+    "Porzioni" : {
+
+    },
+    "Preferita" : {
+
+    },
+    "Preferite" : {
+
+    },
+    "Privacy" : {
+
+    },
+    "Privacy. L’intelligenza artificiale lavora sul dispositivo." : {
+
+    },
+    "Procedimento" : {
+
+    },
+    "Prodotto" : {
+
+    },
+    "Quantità" : {
+
+    },
+    "QUANTITÀ" : {
+
+    },
+    "Quantità %@" : {
+
+    },
+    "Questa azione rimuove definitivamente il ricettario locale." : {
+
+    },
+    "Ricetta %@" : {
+
+    },
+    "Ricette" : {
+
+    },
+    "Ricomincia" : {
+
+    },
+    "Rigenera copertina" : {
+
+    },
+    "Riprova" : {
+
+    },
+    "Salva ricetta" : {
+
+    },
+    "Salvataggio non riuscito" : {
+
+    },
+    "Scegli ricetta" : {
+
+    },
+    "Se un social condivide soltanto il link, aggiungi anche didascalia o testo." : {
+
+    },
+    "Settimana precedente" : {
+
+    },
+    "Settimana successiva" : {
+
+    },
+    "Spesa" : {
+
+    },
+    "Titolo" : {
+
+    },
+    "Titolo, ingrediente o fonte" : {
+
+    },
+    "Unità" : {
+
+    },
+    "Verifica stato modello" : {
+
+    },
+    "Versione" : {
+
+    },
+    "Video" : {
+
+    }
+  },
   "version" : "1.0"
 }

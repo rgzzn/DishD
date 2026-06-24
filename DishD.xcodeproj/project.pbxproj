@@ -6,9 +6,46 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E1000000000000000000000A /* DishDShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E10000000000000000000001 /* DishDShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E1000000000000000000000B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0D5AF0A42FEA8D2200CA9759 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E10000000000000000000005;
+			remoteInfo = DishDShareExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E10000000000000000000009 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				E1000000000000000000000A /* DishDShareExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		0D5AF0AC2FEA8D2200CA9759 /* DishD.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DishD.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E10000000000000000000001 /* DishDShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DishDShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E1000000000000000000000E /* Exceptions for "DishDShareExtension" folder in "DishDShareExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E10000000000000000000005 /* DishDShareExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0D5AF0AE2FEA8D2200CA9759 /* DishD */ = {
@@ -16,10 +53,23 @@
 			path = DishD;
 			sourceTree = "<group>";
 		};
+		E10000000000000000000002 /* DishDShareExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E1000000000000000000000E /* Exceptions for "DishDShareExtension" folder in "DishDShareExtension" target */,
+			);
+			path = DishDShareExtension;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		0D5AF0A92FEA8D2200CA9759 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		E10000000000000000000003 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
 			);
@@ -31,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				0D5AF0AE2FEA8D2200CA9759 /* DishD */,
+				E10000000000000000000002 /* DishDShareExtension */,
 				0D5AF0AD2FEA8D2200CA9759 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -39,6 +90,7 @@
 			isa = PBXGroup;
 			children = (
 				0D5AF0AC2FEA8D2200CA9759 /* DishD.app */,
+				E10000000000000000000001 /* DishDShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -53,8 +105,12 @@
 				0D5AF0A82FEA8D2200CA9759 /* Sources */,
 				0D5AF0A92FEA8D2200CA9759 /* Frameworks */,
 				0D5AF0AA2FEA8D2200CA9759 /* Resources */,
+				E10000000000000000000009 /* Embed App Extensions */,
 			);
 			buildRules = (
+			);
+			dependencies = (
+				E1000000000000000000000C /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				0D5AF0AE2FEA8D2200CA9759 /* DishD */,
@@ -63,6 +119,24 @@
 			productName = DishD;
 			productReference = 0D5AF0AC2FEA8D2200CA9759 /* DishD.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E10000000000000000000005 /* DishDShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E10000000000000000000006 /* Build configuration list for PBXNativeTarget "DishDShareExtension" */;
+			buildPhases = (
+				E10000000000000000000004 /* Sources */,
+				E10000000000000000000003 /* Frameworks */,
+				E1000000000000000000000D /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				E10000000000000000000002 /* DishDShareExtension */,
+			);
+			name = DishDShareExtension;
+			productName = DishDShareExtension;
+			productReference = E10000000000000000000001 /* DishDShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -75,6 +149,9 @@
 				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					0D5AF0AB2FEA8D2200CA9759 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					E10000000000000000000005 = {
 						CreatedOnToolsVersion = 27.0;
 					};
 				};
@@ -94,12 +171,18 @@
 			projectRoot = "";
 			targets = (
 				0D5AF0AB2FEA8D2200CA9759 /* DishD */,
+				E10000000000000000000005 /* DishDShareExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		0D5AF0AA2FEA8D2200CA9759 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		E1000000000000000000000D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -112,7 +195,20 @@
 			files = (
 			);
 		};
+		E10000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E1000000000000000000000C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E10000000000000000000005 /* DishDShareExtension */;
+			targetProxy = E1000000000000000000000B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		0D5AF0B72FEA8D2300CA9759 /* Debug configuration for PBXProject "DishD" */ = {
@@ -248,6 +344,7 @@
 				DEVELOPMENT_TEAM = HPN3692X55;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "DishD trascrive localmente l’audio dei video che scegli per riconoscere ingredienti e passaggi.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -258,11 +355,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dishd.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lucaragazzini.dishd;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
@@ -275,11 +371,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DishD/DishD.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = HPN3692X55;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "DishD trascrive localmente l’audio dei video che scegli per riconoscere ingredienti e passaggi.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -290,11 +388,65 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dishd.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lucaragazzini.dishd;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E10000000000000000000007 /* Debug configuration for PBXNativeTarget "DishDShareExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HPN3692X55;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DishDShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lucaragazzini.dishd.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E10000000000000000000008 /* Release configuration for PBXNativeTarget "DishDShareExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = DishDShareExtension/DishDShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HPN3692X55;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DishDShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lucaragazzini.dishd.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
@@ -318,6 +470,14 @@
 			buildConfigurations = (
 				0D5AF0BA2FEA8D2300CA9759 /* Debug configuration for PBXNativeTarget "DishD" */,
 				0D5AF0BB2FEA8D2300CA9759 /* Release configuration for PBXNativeTarget "DishD" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		E10000000000000000000006 /* Build configuration list for PBXNativeTarget "DishDShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E10000000000000000000007 /* Debug configuration for PBXNativeTarget "DishDShareExtension" */,
+				E10000000000000000000008 /* Release configuration for PBXNativeTarget "DishDShareExtension" */,
 			);
 			defaultConfigurationName = Release;
 		};
