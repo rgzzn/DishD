@@ -16,6 +16,7 @@ final class SharedItemCollector {
     private(set) var urls: [String] = []
     private(set) var fileNames: [String] = []
     private(set) var items: [CollectedShareItem] = []
+    private(set) var collectionWarnings: [String] = []
     private let linkMetadataTypeIdentifier = "com.apple.linkpresentation.metadata"
 
     func collect(from extensionItems: [NSExtensionItem]) async {
@@ -29,9 +30,17 @@ final class SharedItemCollector {
                     appendLinkMetadata(metadata)
                     continue
                 }
-                if let type = preferredFileType(for: provider),
-                   let file = try? await provider.dishdPersistFile(for: type) {
-                    appendFileItem(name: file.name, originalName: file.originalName, type: type)
+                if let type = preferredFileType(for: provider) {
+                    do {
+                        let file = try await provider.dishdPersistFile(for: type)
+                        appendFileItem(name: file.name, originalName: file.originalName, type: type)
+                    } catch {
+                        // Don't let a failed copy (e.g. a large video exceeding the
+                        // extension's memory budget) silently drop the file.
+                        collectionWarnings.append(
+                            "Non sono riuscito a copiare un file condiviso. Se è un video lungo, salvalo nei File e condividilo da lì."
+                        )
+                    }
                     continue
                 }
                 if provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier),
@@ -118,9 +127,21 @@ final class SharedItemCollector {
     }
 
     private func preferredFileType(for provider: NSItemProvider) -> UTType? {
-        [.movie, .image, .pdf].first {
-            provider.hasItemConformingToTypeIdentifier($0.identifier)
+        // Prefer the provider's CONCRETE registered type (e.g. public.mpeg-4, public.jpeg)
+        // so the persisted file gets a correct, recognizable filename extension. Falling
+        // back to the abstract supertype guarantees we still persist something usable.
+        for supertype in [UTType.movie, .image, .pdf] {
+            let concrete = provider.registeredTypeIdentifiers
+                .compactMap { UTType($0) }
+                .first { $0.conforms(to: supertype) }
+            if let concrete {
+                return concrete
+            }
+            if provider.hasItemConformingToTypeIdentifier(supertype.identifier) {
+                return supertype
+            }
         }
+        return nil
     }
 
     private func appendFileItem(name: String, originalName: String, type: UTType) {
@@ -352,7 +373,12 @@ private enum SharedFileCopier {
             .appending(path: "PendingImports", directoryHint: .isDirectory)
             .appending(path: "Files", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let fileName = "\(UUID().uuidString).\(sourceURL.pathExtension.nilIfBlank ?? type.preferredFilenameExtension ?? "data")"
+        // Trust the UTType's preferred extension first so the main app's importer reliably
+        // recognizes the file; fall back to the source extension, normalized to lowercase.
+        let ext = (type.preferredFilenameExtension
+            ?? sourceURL.pathExtension.nilIfBlank
+            ?? "dat").lowercased()
+        let fileName = "\(UUID().uuidString).\(ext)"
         let destination = directory.appending(path: fileName)
         try FileManager.default.copyItem(at: sourceURL, to: destination)
         return PersistedShareFile(name: fileName, originalName: sourceURL.lastPathComponent)

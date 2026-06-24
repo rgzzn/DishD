@@ -9,11 +9,31 @@ final class ShareExtensionModel {
     var isSaving = false
     var errorMessage: String?
 
+    var hasVideoItem: Bool {
+        // True when there's an actual video file, a remote video URL, or a link
+        // from a platform where the content is typically a video recipe.
+        if items.contains(where: { $0.symbol == "video" }) { return true }
+        return items.contains { item in
+            item.symbol == "link" && isSocialVideoHost(item.detail)
+        }
+    }
+
+    private func isSocialVideoHost(_ host: String) -> Bool {
+        let lower = host.lowercased()
+        return lower.contains("instagram.com")
+            || lower.contains("tiktok.com")
+            || lower.contains("youtube.com")
+            || lower.contains("youtu.be")
+    }
+
     private let collector = SharedItemCollector()
 
     func load(_ extensionItems: [NSExtensionItem]) async {
         await collector.collect(from: extensionItems)
         items = collector.items
+        if let warning = collector.collectionWarnings.first {
+            errorMessage = warning
+        }
         isLoading = false
     }
 
@@ -56,8 +76,22 @@ struct ShareExtensionRootView: View {
                             }
                         }
                     }
-                    Section("Nota opzionale") {
-                        TextField("Aggiungi un contesto", text: $model.note, axis: .vertical)
+                    if model.hasVideoItem {
+                        Section {
+                            TextField(
+                                "Incolla qui la descrizione con ingredienti e passaggi",
+                                text: $model.note,
+                                axis: .vertical
+                            )
+                        } header: {
+                            Text("Descrizione del video")
+                        } footer: {
+                            Text("Incolla la caption o la descrizione del video: di solito contiene ingredienti e procedimento e migliora molto la qualità dell'estrazione.")
+                        }
+                    } else {
+                        Section("Nota opzionale") {
+                            TextField("Aggiungi un contesto", text: $model.note, axis: .vertical)
+                        }
                     }
                 }
                 if let error = model.errorMessage {

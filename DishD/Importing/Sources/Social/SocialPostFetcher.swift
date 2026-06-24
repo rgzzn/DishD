@@ -21,7 +21,13 @@ struct SocialPostFetcher: Sendable {
             metadata: metadata
         )
 
-        guard text.trimmingCharacters(in: .whitespacesAndNewlines).count > 20 else {
+        // Proceed when we have a usable caption, or at least a title/author worth a
+        // partial draft. Only the truly-empty case (Instagram's login wall returning
+        // nothing) hard-fails — the caller turns that into an actionable message.
+        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasAnyMetadata = (oEmbed?.title ?? linkMetadata?.title ?? metadata?.title)?
+            .nilIfBlank != nil || oEmbed?.authorName?.nilIfBlank != nil
+        guard trimmedText.count >= 12 || (hasAnyMetadata && !trimmedText.isEmpty) else {
             throw ImportError.socialContentUnavailable
         }
 
@@ -179,15 +185,16 @@ struct SocialPostFetcher: Sendable {
 
     private func supportedRemoteVideoURL(_ url: URL) -> URL? {
         guard url.scheme?.lowercased() == "https" else { return nil }
+        // HLS (.m3u8) is excluded: AVAssetImageGenerator cannot seek reliably on
+        // non-buffered streams, producing only the first frame.
         let extensionHint = url.pathExtension.lowercased()
-        if ["mov", "mp4", "m4v", "m3u8"].contains(extensionHint) {
+        if ["mov", "mp4", "m4v"].contains(extensionHint) {
             return url
         }
         let absolute = url.absoluteString.lowercased()
         guard absolute.contains(".mp4")
             || absolute.contains(".mov")
             || absolute.contains(".m4v")
-            || absolute.contains(".m3u8")
         else {
             return nil
         }
@@ -253,17 +260,19 @@ private enum SocialPlatform: Equatable {
     }
 
     func oEmbedEndpoint(for url: URL) -> URL? {
-        var components: URLComponents
         switch self {
         case .instagram:
-            components = URLComponents(string: "https://graph.facebook.com/instagram_oembed")!
+            // Instagram's instagram_oembed endpoint has required a Facebook App access
+            // token since 2020 and returns 4xx without one. Skip it entirely rather than
+            // spend a request on a guaranteed failure; rely on link metadata / caption.
+            return nil
         case .tiktok:
-            components = URLComponents(string: "https://www.tiktok.com/oembed")!
+            var components = URLComponents(string: "https://www.tiktok.com/oembed")!
+            components.queryItems = [
+                URLQueryItem(name: "url", value: url.absoluteString)
+            ]
+            return components.url
         }
-        components.queryItems = [
-            URLQueryItem(name: "url", value: url.absoluteString)
-        ]
-        return components.url
     }
 }
 
